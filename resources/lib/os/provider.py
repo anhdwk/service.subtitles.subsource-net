@@ -13,7 +13,6 @@ from resources.lib.utilities import log
 
 API_URL = "https://api.subsource.net/api"
 
-
 def logging(msg):
     return log(__name__, msg)
 
@@ -56,19 +55,14 @@ class SubtitlesProvider:
         return r.json()
 
     def parse_filename(self, filename):
+        filename = re.sub(r'\[.*?\]', '', filename).strip()
         clean_name = re.sub(r'\.\d+p.*|\.(mkv|avi|mp4)$', '', filename)
         clean_name = re.sub(r'\(.*?\)', '', clean_name).strip()
-        # Replace dots that are likely separators (not part of abbreviations)
-        # Replace a dot if it's followed by an uppercase letter or at the end of the name
         clean_name = re.sub(r'\.(?=[A-Z])', ' ', clean_name)
         clean_name = re.sub(r'\.', ' ', clean_name)  # Replace remaining dots that might be separators
         clean_name = re.sub(r'\s+', ' ', clean_name)  
-
-        # Extract year
         year_match = re.search(r'\b(19[0-9]{2}|20[0-9]{2})\b', clean_name)
         year = year_match.group(0) if year_match else None
-
-        # Check for series and season/episode
         series_match = re.search(r'S(\d+)E(\d+)', filename, re.IGNORECASE)
         if series_match:
             type_content = 'TVSeries'
